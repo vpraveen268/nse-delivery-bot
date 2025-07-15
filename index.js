@@ -28,6 +28,7 @@ function downloadCSV(url) {
           "Host": "nsearchives.nseindia.com",
           "Connection": "keep-alive"
         },
+        timeout: 20000, // 20 seconds
         responseType: "stream"
       });
 
@@ -111,8 +112,8 @@ async function updateSheetFromCSV(csvData) {
 async function main() {
   try {
     const dateStr = getTodayDateString();
-    //const url = `https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_${dateStr}.csv`;
-    const url = `https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_14072025.csv`;
+    const url = `https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_${dateStr}.csv`;
+    //const url = `https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_14072025.csv`;
     console.log("📥 Downloading CSV:", url);
 
     const csvData = await downloadCSV(url);
