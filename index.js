@@ -70,40 +70,53 @@ async function updateSheetFromCSV(csvData) {
   const doc = new GoogleSpreadsheet(SHEET_ID);
   await doc.useServiceAccountAuth(creds);
   await doc.loadInfo();
-  const sheet = doc.sheetsByIndex[0];
-  const rows = await sheet.getRows();
 
-  const today = new Date();
-  const dayOfMonth = today.getDate(); // 1 to 31
-  const columnName = `DAY${dayOfMonth}`;
-  console.log(`📅 Today is ${columnName}`);
+  // Map column index: SYMBOL, DAY1 → DAY31 = columns 0 to 31
+  const todayColIndex = new Date().getDate(); // 1 → 31
 
+  // Build lookup maps from CSV
   const deliveryMap = {};
+  const closeMap = {};
+  const volumeMap = {};
+
   for (const row of csvData) {
-    const symbol = row["SYMBOL"];
-    const delivery = row["DELIV_PER"];
-    if (symbol && delivery) {
-      deliveryMap[symbol.trim().toUpperCase()] = delivery.trim();
-    }
+    const symbol = row["SYMBOL"]?.trim().toUpperCase();
+    if (!symbol) continue;
+
+    if (row["DELIV_PER"]) deliveryMap[symbol] = row["DELIV_PER"].trim();
+    if (row["CLOSE_PRICE"]) closeMap[symbol] = row["CLOSE_PRICE"].trim();
+    if (row["TURNOVER_LACS"]) volumeMap[symbol] = row["TURNOVER_LACS"].trim();
   }
 
-  let updatedCount = 0;
-
-  for (const row of rows) {
-    const rawSymbol = row._rawData[0];
-    const symbol = rawSymbol?.toUpperCase().trim();
-
-    if (symbol && deliveryMap[symbol]) {
-      row[columnName] = deliveryMap[symbol];
-      await row.save();
-      console.log(`✅ Updated ${symbol} → ${columnName} = ${deliveryMap[symbol]}`);
-      updatedCount++;
-    } else {
-      console.log(`⚠️  Symbol '${symbol}' not found in Bhavcopy`);
+  const updateSheet = async (sheetName, dataMap) => {
+    const sheet = doc.sheetsByTitle[sheetName];
+    if (!sheet) {
+      console.error(`❌ Sheet '${sheetName}' not found`);
+      return;
     }
-  }
 
-  console.log(`📌 Total rows updated: ${updatedCount}`);
+    const rows = await sheet.getRows();
+    console.log(`📄 Updating '${sheetName}' → Rows: ${rows.length}`);
+
+    for (const row of rows) {
+      const rawSymbol = row._rawData[0];
+      const symbol = rawSymbol?.trim().toUpperCase();
+      const value = dataMap[symbol];
+
+      if (symbol && value) {
+        row._rawData[todayColIndex] = value;
+        await row.save();
+        console.log(`✅ [${sheetName}] ${symbol} → ${value}`);
+      } else {
+        console.log(`⚠️  [${sheetName}] ${symbol} not found in Bhavcopy`);
+      }
+    }
+  };
+
+  // Update all three sheets
+  await updateSheet("DelPerc", deliveryMap);
+  await updateSheet("ClosePrice", closeMap);
+  await updateSheet("Volume", volumeMap);
 }
 
 
