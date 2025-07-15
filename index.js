@@ -4,6 +4,7 @@ const csv = require("csv-parser");
 const creds = JSON.parse(process.env.GOOGLE_CREDENTIALS);
 const SHEET_ID = "1b9s-_Dvy4DdrO4DSo-ADcSUm1Zxz1UK2FiIhYdXr5e8"; // your sheet ID
 const axios = require("axios"); // Add this at top
+const zlib = require('zlib');
 
 function getTodayDateString() {
   const now = new Date();
@@ -21,13 +22,15 @@ function downloadCSV(url) {
     try {
       const response = await axios.get(url, {
         headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
-          "Accept": "text/csv",
-          "Referer": "https://www.nseindia.com/",
-          "Host": "nsearchives.nseindia.com",
-          "Connection": "keep-alive"
-        },
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+  "Accept-Encoding": "gzip, deflate, br",
+  "Accept-Language": "en-US,en;q=0.9",
+  "Referer": "https://www.nseindia.com/",
+  "Origin": "https://www.nseindia.com",
+  "Connection": "keep-alive",
+  "Host": "nsearchives.nseindia.com"
+},
         timeout: 20000, // 20 seconds
         responseType: "stream"
       });
@@ -37,6 +40,7 @@ function downloadCSV(url) {
       let headerLogged = false;
 
       response.data
+        .pipe(zlib.createGunzip())  // Add this if response is gzip
         .pipe(csv())
         .on("data", (rawData) => {
           const cleanData = {};
