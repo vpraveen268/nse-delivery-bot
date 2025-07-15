@@ -1,7 +1,7 @@
 const https = require("https");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
 const csv = require("csv-parser");
-const creds = require("./credentials.json"); // your Google service account key
+const creds = JSON.parse(process.env.GOOGLE_CREDENTIALS);
 const SHEET_ID = "1b9s-_Dvy4DdrO4DSo-ADcSUm1Zxz1UK2FiIhYdXr5e8"; // your sheet ID
 const axios = require("axios"); // Add this at top
 
