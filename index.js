@@ -73,14 +73,11 @@ async function updateSheetFromCSV(csvData) {
   const sheet = doc.sheetsByIndex[0];
   const rows = await sheet.getRows();
 
-  console.log("📊 Total rows in Google Sheet:", rows.length);
-  console.log("📄 Total rows in CSV Bhavcopy:", csvData.length);
+  const today = new Date();
+  const dayOfMonth = today.getDate(); // 1 to 31
+  const columnName = `DAY${dayOfMonth}`;
+  console.log(`📅 Today is ${columnName}`);
 
-  // Show first 10 symbols from CSV
-  //console.log("📄 First 10 SYMBOLs from CSV:");
-  //console.log(csvData.slice(0, 10).map(row => row["SYMBOL"]));
-
-  // Build delivery map from CSV
   const deliveryMap = {};
   for (const row of csvData) {
     const symbol = row["SYMBOL"];
@@ -90,27 +87,25 @@ async function updateSheetFromCSV(csvData) {
     }
   }
 
-  // Show first 10 symbols from delivery map
-  //console.log("🗺️ Sample keys in deliveryMap:", Object.keys(deliveryMap).slice(0, 10));
+  let updatedCount = 0;
 
-  // Compare with Google Sheet symbols
-  //console.log("📋 First 10 symbols from Google Sheet:");
-  //console.log(rows.slice(0, 10).map(r => r._rawData[0]));
-
-  // Update Sheet
   for (const row of rows) {
     const rawSymbol = row._rawData[0];
     const symbol = rawSymbol?.toUpperCase().trim();
 
     if (symbol && deliveryMap[symbol]) {
-      row._rawData[1] = deliveryMap[symbol]; // Column B (index 1)
+      row[columnName] = deliveryMap[symbol];
       await row.save();
-      console.log(`✅ Updated ${symbol} → ${deliveryMap[symbol]}`);
+      console.log(`✅ Updated ${symbol} → ${columnName} = ${deliveryMap[symbol]}`);
+      updatedCount++;
     } else {
       console.log(`⚠️  Symbol '${symbol}' not found in Bhavcopy`);
     }
   }
+
+  console.log(`📌 Total rows updated: ${updatedCount}`);
 }
+
 
 async function main() {
   try {
