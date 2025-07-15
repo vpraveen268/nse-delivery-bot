@@ -4,7 +4,7 @@ const csv = require("csv-parser");
 const creds = JSON.parse(process.env.GOOGLE_CREDENTIALS);
 const SHEET_ID = "1b9s-_Dvy4DdrO4DSo-ADcSUm1Zxz1UK2FiIhYdXr5e8"; // your sheet ID
 const axios = require("axios"); // Add this at top
-const zlib = require('zlib');
+
 
 function getTodayDateString() {
   const now = new Date();
@@ -40,7 +40,6 @@ function downloadCSV(url) {
       let headerLogged = false;
 
       response.data
-        .pipe(zlib.createGunzip())  // Add this if response is gzip
         .pipe(csv())
         .on("data", (rawData) => {
           const cleanData = {};
