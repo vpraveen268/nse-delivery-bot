@@ -1,5 +1,7 @@
+
 const { GoogleSpreadsheet } = require("google-spreadsheet");
 const csv = require("csv-parser");
+//require('dotenv').config();
 const creds = JSON.parse(process.env.GOOGLE_CREDENTIALS);
 const SHEET_ID = "1b9s-_Dvy4DdrO4DSo-ADcSUm1Zxz1UK2FiIhYdXr5e8";
 const axios = require("axios");
@@ -90,7 +92,7 @@ async function main() {
     console.log("🟡 Starting script...");
     const dateStr = getTodayDateString();
     //const url = `https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_${dateStr}.csv`;
-    const url = https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_15072025.csv;
+    const url = "https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_15072025.csv";
     console.log("📥 Downloading CSV:", url);
 
     const csvData = await downloadCSV(url);
