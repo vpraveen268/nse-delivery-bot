@@ -48,6 +48,7 @@ function downloadCSV(url) {
 
 async function updateSheetFromCSV(csvData) {
   const doc = new GoogleSpreadsheet(SHEET_ID);
+  console.log("🟡 Authenticating Google Sheets...");
   await doc.useServiceAccountAuth(creds);
   await doc.loadInfo();
 
@@ -86,6 +87,7 @@ async function updateSheetFromCSV(csvData) {
 
 async function main() {
   try {
+    console.log("🟡 Starting script...");
     const dateStr = getTodayDateString();
     //const url = `https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_${dateStr}.csv`;
     const url = https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_15072025.csv;
